@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/Domain/">
+    <Project Path="Domain/AC.Domain.Entities/AC.Domain.Entities.csproj" />
+    <Project Path="Domain/AC.Domain.ValueObjects/AC.Domain.ValueObjects.csproj" />
+  </Folder>
+  <Project Path="ArbitrationCourt/ArbitrationCourt.csproj" />
+</Solution>
