@@ -1,5 +1,4 @@
-﻿using AC.Domain.Entities.Entities;
-using AC.Domain.ValueObjects;
+﻿using AC.Domain.ValueObjects;
 
 namespace AC.Domain.Entities;
 
@@ -19,10 +18,12 @@ public class Comment : Entity
     
     // КОНСТРУКТОРЫ
     protected Comment() { }
-    public Comment(CommentContent content, Guid authorId, Guid caseId) : base()
+    public Comment(Guid authorId, Guid caseId, CommentContent content) : base()
     {
         Content = content;
-        AuthorId = authorId;
+        if(authorId == Guid.Empty) throw new ArgumentException("AuthorId cannot be empty.", nameof(authorId));
+        if(caseId == Guid.Empty) throw new ArgumentException("CaseId cannot be empty.", nameof(caseId));
         CaseId = caseId;
+        AuthorId = authorId;
     }
 }

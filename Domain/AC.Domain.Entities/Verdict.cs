@@ -1,5 +1,4 @@
-﻿using AC.Domain.Entities.Entities;
-using AC.Domain.ValueObjects;
+﻿using AC.Domain.ValueObjects;
 
 namespace AC.Domain.Entities;
 
@@ -18,8 +17,10 @@ public class Verdict : Entity
     // КОНСТРУКТОРЫ
     protected Verdict() { }
 
-    public Verdict(Guid caseId, Arbitrator arbitrator, VerdictContent content) : base()
+    public Verdict(Arbitrator arbitrator, Guid caseId, VerdictContent content) : base()
     {
+        if(caseId == Guid.Empty) throw new ArgumentException("CaseId cannot be empty.", nameof(caseId));
+        if(arbitrator == null) throw new ArgumentNullException(nameof(arbitrator));
         CaseId = caseId;
         Arbitrator = arbitrator;
         Content = content;

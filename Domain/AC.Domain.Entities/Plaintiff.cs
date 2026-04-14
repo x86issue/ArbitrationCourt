@@ -1,8 +1,7 @@
-﻿using AC.Domain.Entities.Enums;
-using AC.Domain.ValueObjects;
+﻿using AC.Domain.ValueObjects;
 
 
-namespace AC.Domain.Entities.Entities;
+namespace AC.Domain.Entities;
 
 public class Plaintiff : Entity
 {
@@ -10,7 +9,13 @@ public class Plaintiff : Entity
     public FullName Name { get; private set; }
 
     // МЕТОДЫ
+    public void ChangeName(FullName newName)
+    {
+        if (newName == null)
+            throw new ArgumentNullException(nameof(newName));
 
+        Name = newName;
+    }
 
     // КОНСТРУКТОРЫ
     public Plaintiff(FullName name) : base()

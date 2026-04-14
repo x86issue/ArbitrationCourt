@@ -1,0 +1,13 @@
+ValueObjects:
+- FullName [inProgress]
+- CaseTitle [inProgress]
+- CaseDescription [inProgress]
+- ClaimContent [inProgress]
+- CommentContent [inProgress]
+- ProposalContent [inProgress]
+- VerdictData (optional) [inProgress]
+
+
+=======================================
+- [inProgress] значит создано и обрабатывается
+- [Done] значит закончено и протестированно

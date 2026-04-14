@@ -4,7 +4,7 @@ namespace AC.Domain.ValueObjects.Base;
 
 public abstract class ValueObject<T> : IEquatable<ValueObject<T>>
 {
-    public T Value { get; set; }
+    public T Value { get; }
 
     // ПРОХАВАТЬ ЧЕ НАПИСАНО
     protected ValueObject(IValidator<T> validator, T value)

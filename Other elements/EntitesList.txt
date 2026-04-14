@@ -1,0 +1,15 @@
+Entities:
+- Plaintiff [inProgress]
+- Defendant [inProgress]
+- Arbitrator [inProgress] 
+- Case [inProgress]
+- Claim [inProgress]
+- Verdict [inProgress]
+- Comment [inProgress]
+- SettlementProposal [inProgress]
+
+
+
+========================
+- [inProgress] значит создано и обрабатывается
+- [Done] значит закончено и протестированно

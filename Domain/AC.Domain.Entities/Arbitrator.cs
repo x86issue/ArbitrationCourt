@@ -1,5 +1,4 @@
-﻿using AC.Domain.Entities.Enums;
-using AC.Domain.ValueObjects;
+﻿using AC.Domain.ValueObjects;
 
 
 namespace AC.Domain.Entities;
@@ -15,9 +14,26 @@ public class Arbitrator : Entity
 
 
     // МЕТОДЫ
+    public void ChangeBio(string newBio)
+    {
+        if (string.IsNullOrEmpty(newBio))
+            throw new ArgumentNullException(nameof(newBio));
 
+        Bio = newBio;
+    }
+
+
+    public void ChangeName(FullName newName)
+    {
+        if (newName == null)
+            throw new ArgumentNullException(nameof(newName));
+
+        Name = newName;
+    }
 
     // КОНТРУКТОРЫ
+    public Arbitrator() { }
+
     public Arbitrator(FullName name, string? bio, int expirience)
     {
         Name = name;
