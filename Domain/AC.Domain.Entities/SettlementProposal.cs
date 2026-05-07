@@ -8,7 +8,7 @@ public class SettlementProposal : Entity
 {
     // ПОЛЯ
     public Guid CaseId { get; private set; }
-    public Guid ProposerId { get; private set; }
+    public Defendant Defendant { get; private set; }
     public ProposalContent Content { get; private set; }
     public ProposalStatus Status { get; private set; } = ProposalStatus.Created;
 
@@ -29,15 +29,16 @@ public class SettlementProposal : Entity
     }
 
     // КОНСТРУКТОРЫ
-    public SettlementProposal() { }
+    protected SettlementProposal() { }
 
-    public SettlementProposal(Guid proposerId, Guid caseId, ProposalContent content) : base()
+    public SettlementProposal(Defendant defendant, Guid caseId, ProposalContent content) : base()
     {
-        if(proposerId == Guid.Empty) throw new ArgumentException("ProposerId cannot be empty.", nameof(proposerId));
-        if(caseId == Guid.Empty) throw new ArgumentException("CaseId cannot be empty.", nameof(caseId));
+        Defendant = defendant ?? throw new ArgumentNullException(nameof(defendant));
 
+        if (caseId == Guid.Empty)
+            throw new ArgumentException("CaseId cannot be empty.", nameof(caseId));
+
+        Content = content ?? throw new ArgumentNullException(nameof(content));
         CaseId = caseId;
-        ProposerId = proposerId;
-        Content = content;
     }
 }

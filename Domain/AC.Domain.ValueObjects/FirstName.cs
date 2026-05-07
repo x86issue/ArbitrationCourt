@@ -3,4 +3,4 @@ using AC.Domain.ValueObjects.Validators;
 
 namespace AC.Domain.ValueObjects;
 
-public class FullName(string name) : ValueObject<string>(new FullNameValidator(), name);
+public class FirstName(string name) : ValueObject<string>(new FirstNameValidator(), name);

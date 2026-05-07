@@ -1,7 +1,7 @@
 ﻿using AC.Domain.ValueObjects.Base;
 using AC.Domain.ValueObjects.Exceptions;
 
-namespace AC.Domain.ValueObjects.Validators;
+namespace AC.Domain.ValueObjects.archive;
 
 public class FullNameValidator : IValidator<string>
 {

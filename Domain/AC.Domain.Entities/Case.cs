@@ -14,52 +14,81 @@ public class Case : Entity
 
 
 
-    private readonly List<Comment> _comments = new();
-    public IReadOnlyCollection<Comment> Comments => _comments;
+    private ICollection<Comment> _comments = new List<Comment>();
+    private ICollection<SettlementProposal> _proposals = new List<SettlementProposal>();
+    private ICollection<CourtRule> _rules = new List<CourtRule>();
+
+    public IReadOnlyCollection<Comment> Comments => _comments.ToList();
+    public IReadOnlyCollection<SettlementProposal> Proposals => _proposals.ToList();
+    public IReadOnlyCollection<CourtRule> Rules => _rules.ToList();
+
 
     public Plaintiff Plaintiff { get; }
     public Defendant Defendant { get; }
-    public Arbitrator? Arbitrator { get; /* подумать над возможностью изменять судью */ }
+    public Arbitrator? Arbitrator { get; private set;/* подумать над возможностью изменять судью */ }
 
     public CaseStatus Status { get; private set; } = CaseStatus.Opened;
+    public Claim? Claim { get; private set; }
+    public Verdict? Verdict { get; private set; }
 
     public DateTime? ClosedAt { get; private set; }
 
 
-    // ПРОВЕРКИ
     public bool isActive() // активно ли дело
     {
-        return Status == CaseStatus.Opened || Status == CaseStatus.InProgress;
+        if (Status == CaseStatus.Opened || Status == CaseStatus.InProgress) return true;
+
+        return false;
     }
 
-    // ДЖБТ СКАЗАЛ ПЕРЕПИСАТЬ ПРОВЕРКУ canComment, назвав меня дураком за неправильную логику DDD. 
-    public void EnsureCanComment(Guid userId)
+ 
+    public bool ArbitratorIsParticipant(Arbitrator arbitrator)
     {
-        if (!(Plaintiff.Id == userId || Defendant.Id == userId || Arbitrator?.Id == userId))
+        if (Arbitrator == null || Arbitrator != arbitrator)
+        {
             throw new CommentNotAllowedException();
+        }
+
+        return true;
     }
 
-    public bool IsParticipant(Guid userId) // участник дела
+    public bool DefendantIsParticipant(Defendant defendant)
     {
-        if(Plaintiff.Id == userId || Defendant.Id == userId) return true;
-        else return false;
+        if (Defendant != defendant)
+        {
+            throw new CommentNotAllowedException();
+        }
+
+        return true;
     }
 
-    public bool IsArbitrator(Guid userId) // является ли арбитром
+    public bool PlaintiffIsParticipant(Plaintiff plaintiff)
     {
-        if (Arbitrator?.Id == userId) return true;
+        if (Plaintiff != plaintiff)
+        {
+            throw new CommentNotAllowedException();
+        }
+
+        return true;
+    }
+
+
+    public bool IsArbitrator(Arbitrator arbitrator) // является ли арбитром
+    {
+        if (Arbitrator == arbitrator) return true;
         else return false;
     }
 
     public bool HasActiveProposal()
     {
-        return Status == CaseStatus.InProgress;
+        if(Proposals.Any(p => p.Status == ProposalStatus.Created)) return true;
+        else return false;
     }
 
     // МЕТОДЫ
 
     // МЕТОД-ЗАГЛУШКА ПОКА НЕТ НУМИРОВАННОГО СПИСКА СУДЕЙ С ВОЗМОЖНОСТЬЮ ОДОБРЕНИЯ С ОБЕИХ СТОРОН
-    public void AssignArbitrator(Arbitrator arbitrator) // назначить арбитра
+    public bool AssignArbitrator(Arbitrator arbitrator) // назначить арбитра
     {
         if(Status == CaseStatus.ClosedByVerdict) throw new InvalidOperationException("Невозможно назначить арбитра для дела, которое закрыто вердиктом.");
 
@@ -67,59 +96,121 @@ public class Case : Entity
 
         Arbitrator = arbitrator;
         Status = CaseStatus.InProgress;
+        return true;
     }
 
-    public Comment AddComment(Guid authorid, CommentContent content) // добавить комментарий
+    public bool AddRule(CourtRule rule)
     {
-        EnsureCanComment(authorid);
+        if (rule is null)
+            throw new ArgumentNullException(nameof(rule));
 
-        var comment = new Comment(authorid, this.Id, content);
+        if (_rules.Any(r => r.Id == rule.Id))
+            throw new InvalidOperationException("Это правило уже добавлено к делу.");
 
+        _rules.Add(rule);
+        return true;
+    }
+
+    public bool RemoveRule(CourtRule rule)
+    {
+        if (rule is null)
+            throw new ArgumentNullException(nameof(rule));
+
+        var existingRule = _rules.FirstOrDefault(r => r.Id == rule.Id);
+
+        if (existingRule is null)
+            throw new InvalidOperationException("Это правило не привязано к делу.");
+
+        _rules.Remove(existingRule);
+        return true;
+    }
+
+    public bool HasRule(CourtRule rule)
+    {
+        if (rule is null)
+            throw new ArgumentNullException(nameof(rule));
+
+        return _rules.Any(r => r.Id == rule.Id);
+    }
+
+
+    public Comment AddCommentByPlaintiff(Plaintiff plaintiff, CommentContent content) // добавить комментарий
+    {
+        PlaintiffIsParticipant(plaintiff);
+        var comment = new Comment(plaintiff, this.Id, content);
         _comments.Add(comment);
-
         return comment;
+
     }
 
-    public SettlementProposal CreateProposal(Guid authorId, ProposalContent content) // создать предложение по урегулированию
+    public Comment AddCommentByDefendant(Defendant defendant, CommentContent content) // добавить комментарий
     {
-        if (!IsParticipant(Defendant.Id)) throw new InvalidOperationException("Пользователь не может создавать предложения для этого дела.");
-        if (Status != CaseStatus.InProgress || Status != CaseStatus.Opened) throw new InvalidOperationException("Предложения могут быть созданы только для дел в процессе.");
-        return new SettlementProposal(authorId, this.Id, content);
+        DefendantIsParticipant(defendant);
+        var comment = new Comment(defendant, this.Id, content);
+        _comments.Add(comment);
+        return comment;
+
+    }
+
+    public Comment AddCommentByArbitrator(Arbitrator arbitrator, CommentContent content) // добавить комментарий
+    {
+        ArbitratorIsParticipant(arbitrator);
+        var comment = new Comment(arbitrator, this.Id, content);
+        _comments.Add(comment);
+        return comment;
+
+    }
+
+
+    // ПОДУМАТЬ МЕТОДЫ СВЕРХУ ВОЗМОЖНО МОЖНО ОБЪЕДИНИТЬ И ВЫЗЫВАТЬ ЧЕРЕЗ ОДНУ КОМАНДУ
+    public SettlementProposal CreateProposal(Defendant defendant, ProposalContent content) // создать предложение по урегулированию
+    {
+        if (Defendant != defendant) throw new InvalidOperationException("Пользователь не может создавать предложения для этого дела.");
+        if (Status != CaseStatus.InProgress && Status != CaseStatus.Opened) throw new InvalidOperationException("Предложения могут быть созданы только для дел в процессе.");
+        var proposal = new SettlementProposal(defendant, this.Id, content);
+        _proposals.Add(proposal);
+        return proposal;
     }
 
     public Verdict IssueVerdict(Arbitrator arbitrator, VerdictContent content) // вынести вердикт
     {
-        if (!IsArbitrator(arbitrator.Id)) throw new InvalidOperationException("Данный арбитр не может выносить вердикт для этого дела.");
-        if (Status != CaseStatus.InProgress || Status != CaseStatus.Opened) throw new InvalidOperationException("Вердикт может быть вынесен только для дела в процессе.");
+        if (Arbitrator != arbitrator) throw new InvalidOperationException("Данный арбитр не может выносить вердикт для этого дела.");
+        if (Status != CaseStatus.InProgress && Status != CaseStatus.Opened) throw new InvalidOperationException("Вердикт может быть вынесен только для дела в процессе.");
         if (content == null) throw new ArgumentNullException(nameof(content));
         if (this.Status == CaseStatus.ClosedByProposal || this.Status == CaseStatus.ClosedByVerdict)
                  throw new InvalidOperationException("Невозможно вынести вердикт для дела, которое закрыто предложением по урегулированию.");
+
+        Verdict = new Verdict(arbitrator, Id, content);
         Status = CaseStatus.ClosedByVerdict;
         ClosedAt = DateTime.UtcNow;
-        return new Verdict(arbitrator, this.Id, content);
+        return Verdict;
     }
 
     public Claim CreateClaim(ClaimContent content) // создать иск
     {
         if (Status != CaseStatus.Opened) throw new InvalidOperationException("Иск может быть создан только для открытого дела.");
-        return new Claim(Plaintiff, Defendant, content);
+        Claim = new Claim(Plaintiff, Defendant, content);
+        return Claim;
+
     }
 
-    public void AcceptProposal(Plaintiff plaintiff, SettlementProposal proposal) // принять предложение по урегулированию
+    public bool AcceptProposal(Plaintiff plaintiff, SettlementProposal proposal) // принять предложение по урегулированию
     {
-        if(plaintiff.Id != Plaintiff.Id) throw new InvalidOperationException("Пользователь не может принимать предложения для этого дела.");
-        if (Status != CaseStatus.InProgress || Status != CaseStatus.Opened) throw new InvalidOperationException("Предложение может быть принято только для дела в процессе.");
+        if(Plaintiff != plaintiff) throw new InvalidOperationException("Пользователь не может принимать предложения для этого дела.");
+        if (Status != CaseStatus.InProgress && Status != CaseStatus.Opened) throw new InvalidOperationException("Предложение может быть принято только для дела в процессе.");
         Status = CaseStatus.ClosedByProposal;
         proposal.Accept();
         ClosedAt = DateTime.UtcNow;
+        return true;
     }
 
-    public void RejectProposal(Plaintiff plaintiff, SettlementProposal proposal) // отклонить предложение по урегулированию
+    public bool RejectProposal(Plaintiff plaintiff, SettlementProposal proposal) // отклонить предложение по урегулированию
     {
         if (plaintiff.Id != Plaintiff.Id) throw new InvalidOperationException("Пользователь не может отклонять предложения для этого дела.");
         if (proposal.Status != ProposalStatus.Created) throw new InvalidOperationException("Предложение уже обработано");
-        if (Status != CaseStatus.InProgress || Status != CaseStatus.Opened) throw new InvalidOperationException("Предложение может быть отклонено только для дела в процессе.");
+        if (Status != CaseStatus.InProgress && Status != CaseStatus.Opened) throw new InvalidOperationException("Предложение может быть отклонено только для дела в процессе.");
         proposal.Reject();
+        return true;
     }
 
     // ======================================================================================================================================================
