@@ -18,12 +18,30 @@ public class Comment : Entity
     
     // КОНСТРУКТОРЫ
     protected Comment() { }
-    public Comment(Guid authorId, Guid caseId, CommentContent content) : base()
+    public Comment(Plaintiff plaintiff, Guid caseId, CommentContent content) : base()
     {
         Content = content;
-        if(authorId == Guid.Empty) throw new ArgumentException("AuthorId cannot be empty.", nameof(authorId));
+        if(plaintiff.Id == Guid.Empty) throw new ArgumentException("AuthorId cannot be empty.", nameof(plaintiff.Id));
         if(caseId == Guid.Empty) throw new ArgumentException("CaseId cannot be empty.", nameof(caseId));
         CaseId = caseId;
-        AuthorId = authorId;
+        AuthorId = plaintiff.Id;
+    }
+
+    public Comment(Defendant defendant, Guid caseId, CommentContent content) : base()
+    {
+        Content = content;
+        if (defendant.Id == Guid.Empty) throw new ArgumentException("AuthorId cannot be empty.", nameof(defendant.Id));
+        if (caseId == Guid.Empty) throw new ArgumentException("CaseId cannot be empty.", nameof(caseId));
+        CaseId = caseId;
+        AuthorId = defendant.Id;
+    }
+
+    public Comment(Arbitrator arbitrator, Guid caseId, CommentContent content) : base()
+    {
+        Content = content;
+        if (arbitrator.Id == Guid.Empty) throw new ArgumentException("AuthorId cannot be empty.", nameof(arbitrator.Id));
+        if (caseId == Guid.Empty) throw new ArgumentException("CaseId cannot be empty.", nameof(caseId));
+        CaseId = caseId;
+        AuthorId = arbitrator.Id;
     }
 }

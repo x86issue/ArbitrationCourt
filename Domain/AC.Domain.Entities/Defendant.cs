@@ -6,22 +6,24 @@ namespace AC.Domain.Entities;
 public class Defendant : Entity
 {
     // ПОЛЯ
-    public FullName Name { get; private set; }
+    public FirstName Name { get; private set; }
+    public LastName Surname { get; private set; }
 
     // МЕТОДЫ
-    public void ChangeName(FullName newName)
+    public bool ChangeName(FirstName newName)
     {
-        if (newName == null)
-            throw new ArgumentNullException(nameof(newName));
-
         Name = newName;
+        return true;
     }
 
 
 
     // КОНСТРУКТОРЫ
-    public Defendant(FullName name) : base()
+    protected Defendant() { }
+
+    public Defendant(FirstName name, LastName surname) : base()
     {
         Name = name;
+        Surname = surname;
     }
 }
