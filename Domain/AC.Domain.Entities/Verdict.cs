@@ -1,28 +1,26 @@
-﻿using AC.Domain.ValueObjects;
+using AC.Domain.ValueObjects;
 
 namespace AC.Domain.Entities;
 
-public class Verdict : Entity
+public class Verdict : Entity<Guid>
 {
-    // ПОЛЯ
-    public Guid CaseId { get; private set; }
-    public Arbitrator Arbitrator { get; private set; }
-    public VerdictContent Content { get; private set; }
+    public Case CaseAssigned { get; private set; } = null!;
+    public Arbitrator Arbitrator { get; private set; } = null!;
+    public VerdictContent Content { get; private set; } = null!;
 
-
-    // МЕТОДЫ 
-
-
-
-    // КОНСТРУКТОРЫ
-    protected Verdict() { }
-
-    public Verdict(Arbitrator arbitrator, Guid caseId, VerdictContent content) : base()
+    protected Verdict()
     {
-        if(caseId == Guid.Empty) throw new ArgumentException("CaseId cannot be empty.", nameof(caseId));
-        if(arbitrator == null) throw new ArgumentNullException(nameof(arbitrator));
-        CaseId = caseId;
-        Arbitrator = arbitrator;
-        Content = content;
+    }
+
+    public Verdict(DateTime created, Arbitrator arbitrator, Case _case, VerdictContent content)
+        : this(Guid.NewGuid(), created, arbitrator, _case, content)
+    {
+    }
+
+    protected Verdict(Guid id, DateTime created, Arbitrator arbitrator, Case _case, VerdictContent content) : base(id)
+    {
+        Arbitrator = arbitrator ?? throw new ArgumentNullException(nameof(arbitrator));
+        Content = content ?? throw new ArgumentNullException(nameof(content));
+        CaseAssigned = _case ?? throw new ArgumentNullException(nameof(_case));
     }
 }

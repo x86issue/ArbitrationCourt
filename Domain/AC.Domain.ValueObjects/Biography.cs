@@ -3,4 +3,4 @@ using AC.Domain.ValueObjects.Validators;
 
 namespace AC.Domain.ValueObjects;
 
-public class RuleTitle(string title) : ValueObject<string>(new RuleTitleValidator(), title);
+public class Biography(string content) : ValueObject<string>(new BioValidator(), content);

@@ -198,6 +198,7 @@ internal class Program
         var lastName = ReadString("Введите фамилию истца");
 
         var plaintiff = new Plaintiff(
+            new DateTime(),
             new FirstName(firstName),
             new LastName(lastName)
         );
@@ -216,6 +217,7 @@ internal class Program
         var lastName = ReadString("Введите фамилию ответчика");
 
         var defendant = new Defendant(
+            new DateTime(),
             new FirstName(firstName),
             new LastName(lastName)
         );
@@ -236,10 +238,11 @@ internal class Program
         var experience = ReadInt("Введите опыт арбитра в годах");
 
         var arbitrator = new Arbitrator(
+            new DateTime(),
             new FirstName(firstName),
             new LastName(lastName),
-            bio,
-            experience
+            new Biography(bio),
+            new Experience(experience)
         );
 
         Arbitrators.Add(arbitrator);
@@ -259,6 +262,7 @@ internal class Program
         var description = ReadString("Введите описание дела");
 
         var courtCase = new Case(
+            new DateTime(),
             plaintiff,
             defendant,
             new CaseTitle(title),
@@ -494,7 +498,7 @@ internal class Program
 
             case "2":
                 {
-                    var bio = ReadString("Введите новую биографию арбитра");
+                    Biography bio = new Biography("Введите новую биографию арбитра");
 
                     arbitrator.ChangeBio(bio);
 
@@ -785,6 +789,7 @@ internal class Program
         var description = ReadString("Введите описание правила");
 
         var rule = new CourtRule(
+            new DateTime(),
             new RuleTitle(title),
             new RuleContent(description)
         );
@@ -930,10 +935,11 @@ internal class Program
     {
         Console.WriteLine($"[{index}] Arbitrator");
         Console.WriteLine($"     Id: {arbitrator.Id}");
+        Console.WriteLine($"     CreatedAt: {arbitrator.CreatedAt}");
         Console.WriteLine($"     Имя: {arbitrator.Name}");
         Console.WriteLine($"     Фамилия: {arbitrator.Surname}");
         Console.WriteLine($"     Bio: {arbitrator.Bio}");
-        Console.WriteLine($"     Опыт: {arbitrator.Expirience}");
+        Console.WriteLine($"     Опыт: {arbitrator.Exp}");
         Console.WriteLine($"     Активен: {arbitrator.IsActived}");
     }
 
@@ -976,7 +982,7 @@ internal class Program
     {
         Console.WriteLine($"[{index}] Comment");
         Console.WriteLine($"     Id: {comment.Id}");
-        Console.WriteLine($"     CaseId: {comment.CaseId}");
+        Console.WriteLine($"     CaseId: {comment.CaseAssigned}");
         Console.WriteLine($"     AuthorId: {comment.AuthorId}");
         Console.WriteLine($"     Содержание: {comment.Content}");
     }
@@ -985,7 +991,7 @@ internal class Program
     {
         Console.WriteLine($"[{index}] SettlementProposal");
         Console.WriteLine($"     Id: {proposal.Id}");
-        Console.WriteLine($"     CaseId: {proposal.CaseId}");
+        Console.WriteLine($"     CaseId: {proposal.CaseAssigned}");
         Console.WriteLine($"     Ответчик: {proposal.Defendant.Name} {proposal.Defendant.Surname}");
         Console.WriteLine($"     Статус: {proposal.Status}");
         Console.WriteLine($"     Содержание: {proposal.Content}");
@@ -995,7 +1001,7 @@ internal class Program
     {
         Console.WriteLine("Verdict");
         Console.WriteLine($"     Id: {verdict.Id}");
-        Console.WriteLine($"     CaseId: {verdict.CaseId}");
+        Console.WriteLine($"     CaseId: {verdict.CaseAssigned}");
         Console.WriteLine($"     Арбитр: {verdict.Arbitrator.Name} {verdict.Arbitrator.Surname}");
         Console.WriteLine($"     Содержание: {verdict.Content}");
     }
@@ -1116,11 +1122,13 @@ internal class Program
         // =========================
 
         var plaintiff1 = new Plaintiff(
+            new DateTime(),
             new FirstName("Иван"),
             new LastName("Крыса")
         );
 
         var plaintiff2 = new Plaintiff(
+            new DateTime(),
             new FirstName("Алексей"),
             new LastName("Плаксикович")
         );
@@ -1133,11 +1141,13 @@ internal class Program
         // =========================
 
         var defendant1 = new Defendant(
+            new DateTime(),
             new FirstName("Петр"),
             new LastName("Газмясов")
         );
 
         var defendant2 = new Defendant(
+            new DateTime(),
             new FirstName("Сергей"),
             new LastName("ОтвечаюНеВиновен")
         );
@@ -1150,17 +1160,19 @@ internal class Program
         // =========================
 
         var arbitrator1 = new Arbitrator(
+            new DateTime(),
             new FirstName("Анна"),
             new LastName("Правосудьева"),
-            "Арбитр по коммерческим и договорным спорам.",
-            10
+            new Biography("Арбитр по коммерческим и договорным спорам."),
+            new Experience(10)
         );
 
         var arbitrator2 = new Arbitrator(
+            new DateTime(),
             new FirstName("Мария"),
             new LastName("ПапаПрокуроровна"),
-            "Арбитр с опытом рассмотрения споров о поставке и оказании услуг.",
-            7
+            new Biography("Арбитр с опытом рассмотрения споров о поставке и оказании услуг."),
+            new Experience(7)
         );
 
         Arbitrators.Add(arbitrator1);
@@ -1171,36 +1183,43 @@ internal class Program
         // =========================
 
         var rule1 = new CourtRule(
+            new DateTime(),
             new RuleTitle("Actuallyism"),
             new RuleContent("Все возражения принимаются только в форме “ну это вообще-то…” с поднятым указательным пальцем.")
         );
 
         var rule2 = new CourtRule(
+            new DateTime(),
             new RuleTitle("Gavelrage"),
             new RuleContent("Судья имеет право стукнуть молотком только после фразы: “Так, всё, я сейчас разберусь как взрослый человек”.")
         );
 
         var rule3 = new CourtRule(
+            new DateTime(),
             new RuleTitle("Memesummary"),
             new RuleContent("Сторона, затянувшая речь дольше трёх минут, обязана кратко пересказать её мемом.")
         );
 
         var rule4 = new CourtRule(
+            new DateTime(),
         new RuleTitle("Topsecretfolder"),
         new RuleContent("Доказательства принимаются только в папке с надписью “Суперважное, не открывать”.")
         );
 
         var rule5 = new CourtRule(
+            new DateTime(),
         new RuleTitle("Nonlawyerism"),
         new RuleContent("Каждый участник процесса должен хотя бы один раз сказать: “Я не юрист, но звучит убедительно”.")
         );
 
         var rule6 = new CourtRule(
+            new DateTime(),
         new RuleTitle("Precedenting"),
         new RuleContent("При слове “прецедент” все делают серьёзное лицо и кивают, даже если никто не понял, о чём речь.")
         );
 
         var rule7 = new CourtRule(
+            new DateTime(),
         new RuleTitle("Bureaucracywin"),
         new RuleContent("Проигравшая сторона обязана торжественно признать: “Ладно, в этот раз бюрократия победила”.")
         );
@@ -1218,6 +1237,7 @@ internal class Program
         // =========================
 
         var case1 = new Case(
+            new DateTime(),
             plaintiff1,
             defendant1,
             new CaseTitle("Спор о нарушении договора поставки"),
@@ -1234,6 +1254,7 @@ internal class Program
         // =========================
 
         var case2 = new Case(
+            new DateTime(),
             plaintiff2,
             defendant2,
             new CaseTitle("Спор о задолженности по договору услуг"),

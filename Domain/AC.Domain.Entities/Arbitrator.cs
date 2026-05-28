@@ -1,48 +1,53 @@
-﻿using AC.Domain.ValueObjects;
-using AC.Domain.ValueObjects.Validators;
-
+using AC.Domain.ValueObjects;
 
 namespace AC.Domain.Entities;
 
-public class Arbitrator : Entity
+public class Arbitrator : Entity<Guid>
 {
-    // ПОЛЯ
-    public FirstName Name { get; private set; }
-    public LastName Surname { get; private set; }
+    public FirstName Name { get; private set; } = null!;
+    public LastName Surname { get; private set; } = null!;
+    public Biography? Bio { get; private set; }
+    public Experience? Exp { get; private set; }
+    public bool IsActived { get; private set; } = true;
 
-    public string? Bio { get; private set; }
-    public int Expirience { get; private set; }
-    public bool IsActived { get; } = true;
-
-
-    // МЕТОДЫ
-    public void ChangeBio(string newBio)
+    protected Arbitrator()
     {
-        if (string.IsNullOrEmpty(newBio))
-            throw new ArgumentNullException(nameof(newBio));
-
-        Bio = newBio;
     }
 
+    public bool ChangeBio(Biography newBio)
+    {
+        if (Bio != newBio)
+        {
+            Bio = newBio;
+            return true;
+        }
+
+        return false;
+    }
 
     public bool ChangeName(FirstName newName)
     {
         if (newName == null) throw new ArgumentNullException(nameof(newName));
 
-        Name = newName;
-        return true;
+        if (Name != newName)
+        {
+            Name = newName;
+            return true;
+        }
+
+        return false;
     }
 
-
-    // КОНТРУКТОРЫ
-    protected Arbitrator() { } // поч сломан разобраться
-
-    public Arbitrator(FirstName name,LastName surname, string? bio, int expirience)
+    public Arbitrator(DateTime created, FirstName name, LastName surname, Biography? bio, Experience? expirience)
+        : this(Guid.NewGuid(), created, name, surname, bio, expirience)
     {
-        Name = name;
-        Surname = surname;
+    }
+
+    protected Arbitrator(Guid id, DateTime created, FirstName name, LastName surname, Biography? bio, Experience? exp) : base(id)
+    {
+        Name = name ?? throw new ArgumentNullException(nameof(name));
+        Surname = surname ?? throw new ArgumentNullException(nameof(surname));
         Bio = bio;
-        Expirience = expirience;
+        Exp = exp;
     }
 }
-

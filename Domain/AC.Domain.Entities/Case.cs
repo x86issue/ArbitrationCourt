@@ -1,16 +1,17 @@
-﻿using AC.Domain.Entities.Enums;
+using AC.Domain.Entities.Enums;
 using AC.Domain.Entities.Exceptions;
 using AC.Domain.ValueObjects;
+using System.Xml.Linq;
 
 
 
 namespace AC.Domain.Entities;
 
-public class Case : Entity
+public class Case : Entity<Guid>
 {
     // ПОЛЯ
-    public CaseTitle Title { get; private set; }
-    public CaseDescription Description { get; private set; }
+    public CaseTitle Title { get; private set; } = null!;
+    public CaseDescription Description { get; private set; } = null!;
 
 
 
@@ -23,8 +24,8 @@ public class Case : Entity
     public IReadOnlyCollection<CourtRule> Rules => _rules.ToList();
 
 
-    public Plaintiff Plaintiff { get; }
-    public Defendant Defendant { get; }
+    public Plaintiff Plaintiff { get; private set; } = null!;
+    public Defendant Defendant { get; private set; } = null!;
     public Arbitrator? Arbitrator { get; private set;/* подумать над возможностью изменять судью */ }
 
     public CaseStatus Status { get; private set; } = CaseStatus.Opened;
@@ -137,7 +138,7 @@ public class Case : Entity
     public Comment AddCommentByPlaintiff(Plaintiff plaintiff, CommentContent content) // добавить комментарий
     {
         PlaintiffIsParticipant(plaintiff);
-        var comment = new Comment(plaintiff, this.Id, content);
+        var comment = new Comment(plaintiff, this, content);
         _comments.Add(comment);
         return comment;
 
@@ -146,7 +147,7 @@ public class Case : Entity
     public Comment AddCommentByDefendant(Defendant defendant, CommentContent content) // добавить комментарий
     {
         DefendantIsParticipant(defendant);
-        var comment = new Comment(defendant, this.Id, content);
+        var comment = new Comment(defendant, this, content);
         _comments.Add(comment);
         return comment;
 
@@ -155,7 +156,7 @@ public class Case : Entity
     public Comment AddCommentByArbitrator(Arbitrator arbitrator, CommentContent content) // добавить комментарий
     {
         ArbitratorIsParticipant(arbitrator);
-        var comment = new Comment(arbitrator, this.Id, content);
+        var comment = new Comment(arbitrator, this, content);
         _comments.Add(comment);
         return comment;
 
@@ -167,7 +168,7 @@ public class Case : Entity
     {
         if (Defendant != defendant) throw new InvalidOperationException("Пользователь не может создавать предложения для этого дела.");
         if (Status != CaseStatus.InProgress && Status != CaseStatus.Opened) throw new InvalidOperationException("Предложения могут быть созданы только для дел в процессе.");
-        var proposal = new SettlementProposal(defendant, this.Id, content);
+        var proposal = new SettlementProposal(DateTime.Now, defendant, this, content);
         _proposals.Add(proposal);
         return proposal;
     }
@@ -180,7 +181,7 @@ public class Case : Entity
         if (this.Status == CaseStatus.ClosedByProposal || this.Status == CaseStatus.ClosedByVerdict)
                  throw new InvalidOperationException("Невозможно вынести вердикт для дела, которое закрыто предложением по урегулированию.");
 
-        Verdict = new Verdict(arbitrator, Id, content);
+        Verdict = new Verdict(DateTime.Now, arbitrator, this, content);
         Status = CaseStatus.ClosedByVerdict;
         ClosedAt = DateTime.UtcNow;
         return Verdict;
@@ -189,7 +190,7 @@ public class Case : Entity
     public Claim CreateClaim(ClaimContent content) // создать иск
     {
         if (Status != CaseStatus.Opened) throw new InvalidOperationException("Иск может быть создан только для открытого дела.");
-        Claim = new Claim(Plaintiff, Defendant, content);
+        Claim = new Claim(DateTime.Now, Plaintiff, Defendant, content);
         return Claim;
 
     }
@@ -228,15 +229,31 @@ public class Case : Entity
 
 
     // КОНСТРУКТОРЫ
-    protected Case() { }
-    
-    public Case(Plaintiff plaintiff, Defendant defendant, CaseTitle title, CaseDescription description) : base()
+
+    protected Case()
+    {
+    }
+
+    public Case(
+    DateTime created,
+    Plaintiff plaintiff,
+    Defendant defendant,
+    CaseTitle title,
+    CaseDescription description) : this(Guid.NewGuid(), created, plaintiff, defendant, title, description) { }
+
+
+    protected Case(
+        Guid id,
+        DateTime created,
+        Plaintiff plaintiff,
+        Defendant defendant,
+        CaseTitle title,
+        CaseDescription description) : base(id)
     {
         Title = title;
         Description = description;
         Plaintiff = plaintiff ?? throw new ArgumentNullException(nameof(plaintiff));
         Defendant = defendant ?? throw new ArgumentNullException(nameof(defendant));
     }
-
 
 }

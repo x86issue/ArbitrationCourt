@@ -1,27 +1,26 @@
-﻿
 using AC.Domain.ValueObjects;
 
 namespace AC.Domain.Entities;
-public class Claim
+
+public class Claim : Entity<Guid>
 {
-    public ClaimContent Content { get; private set; }
-    public Plaintiff Plaintiff { get; private set; } 
-    public Defendant Defendant { get; private set; }  
+    public ClaimContent Content { get; private set; } = null!;
+    public Plaintiff Plaintiff { get; private set; } = null!;
+    public Defendant Defendant { get; private set; } = null!;
 
+    protected Claim()
+    {
+    }
 
-    // МЕТОДЫ 
+    public Claim(DateTime created, Plaintiff plaintiff, Defendant defendant, ClaimContent content)
+        : this(Guid.NewGuid(), created, plaintiff, defendant, content)
+    {
+    }
 
-
-
-    // КОНСТРУКТОРЫ
-    protected Claim() { }
-    public Claim(Plaintiff plaintiff, Defendant defendant, ClaimContent content): base()
+    protected Claim(Guid id, DateTime created, Plaintiff plaintiff, Defendant defendant, ClaimContent content) : base(id)
     {
         Plaintiff = plaintiff ?? throw new ArgumentNullException(nameof(plaintiff));
         Defendant = defendant ?? throw new ArgumentNullException(nameof(defendant));
-
-        Content = content;
+        Content = content ?? throw new ArgumentNullException(nameof(content));
     }
-
-
 }

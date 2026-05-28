@@ -1,22 +1,35 @@
-﻿using AC.Domain.ValueObjects;
+using AC.Domain.ValueObjects;
 
 namespace AC.Domain.Entities;
 
-public class CourtRule : Entity
+public class CourtRule : Entity<Guid>
 {
-    public RuleTitle Title { get; private set; }
-    public RuleContent Description { get; private set; }
+    public RuleTitle Title { get; private set; } = null!;
+    public RuleContent Description { get; private set; } = null!;
 
+    protected CourtRule()
+    {
+    }
 
     public bool ChangeTitle(RuleTitle title)
     {
-        Title = title ?? throw new ArgumentNullException(nameof(title));
+        if (Title != title)
+        {
+            Title = title;
+            return true;
+        }
+
         return false;
     }
 
     public bool ChangeDescription(RuleContent description)
     {
-        Description = description ?? throw new ArgumentNullException(nameof(description));
+        if (Description != description)
+        {
+            Description = description;
+            return true;
+        }
+
         return false;
     }
 
@@ -25,9 +38,12 @@ public class CourtRule : Entity
         return $"{Title}: {Description}";
     }
 
-    protected CourtRule() { }
+    public CourtRule(DateTime created, RuleTitle title, RuleContent description)
+        : this(Guid.NewGuid(), created, title, description)
+    {
+    }
 
-    public CourtRule(RuleTitle title, RuleContent description) : base()
+    protected CourtRule(Guid id, DateTime created, RuleTitle title, RuleContent description) : base(id)
     {
         Title = title ?? throw new ArgumentNullException(nameof(title));
         Description = description ?? throw new ArgumentNullException(nameof(description));

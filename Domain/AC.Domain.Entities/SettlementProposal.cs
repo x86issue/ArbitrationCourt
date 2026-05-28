@@ -1,18 +1,18 @@
-﻿using AC.Domain.Entities.Enums;
+using AC.Domain.Entities.Enums;
 using AC.Domain.ValueObjects;
-
 
 namespace AC.Domain.Entities;
 
-public class SettlementProposal : Entity
+public class SettlementProposal : Entity<Guid>
 {
-    // ПОЛЯ
-    public Guid CaseId { get; private set; }
-    public Defendant Defendant { get; private set; }
-    public ProposalContent Content { get; private set; }
+    public Case CaseAssigned { get; private set; } = null!;
+    public Defendant Defendant { get; private set; } = null!;
+    public ProposalContent Content { get; private set; } = null!;
     public ProposalStatus Status { get; private set; } = ProposalStatus.Created;
 
-    // МЕТОДЫ
+    protected SettlementProposal()
+    {
+    }
 
     public void Accept()
     {
@@ -28,17 +28,15 @@ public class SettlementProposal : Entity
         Status = ProposalStatus.Rejected;
     }
 
-    // КОНСТРУКТОРЫ
-    protected SettlementProposal() { }
+    public SettlementProposal(DateTime created, Defendant defendant, Case _case, ProposalContent content)
+        : this(Guid.NewGuid(), created, defendant, _case, content)
+    {
+    }
 
-    public SettlementProposal(Defendant defendant, Guid caseId, ProposalContent content) : base()
+    protected SettlementProposal(Guid id, DateTime created, Defendant defendant, Case _case, ProposalContent content) : base(id)
     {
         Defendant = defendant ?? throw new ArgumentNullException(nameof(defendant));
-
-        if (caseId == Guid.Empty)
-            throw new ArgumentException("CaseId cannot be empty.", nameof(caseId));
-
         Content = content ?? throw new ArgumentNullException(nameof(content));
-        CaseId = caseId;
+        CaseAssigned = _case ?? throw new ArgumentNullException(nameof(_case));
     }
 }
