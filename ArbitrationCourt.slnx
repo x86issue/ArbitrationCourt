@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/Domain/">
+    <Project Path="Domain/AC.Domain.Entities/AC.Domain.Entities.csproj" />
+    <Project Path="Domain/AC.Domain.ValueObjects/AC.Domain.ValueObjects.csproj" />
+    <Project Path="Domain/AC.Domain.Repositories.Abstractions/AC.Domain.Repositories.Abstractions.csproj" />
+  </Folder>
+  <Folder Name="/Infrastructure/">
+    <Project Path="Infrastructure/AC.Infrastructure.EntityFramework/AC.Infrastructure.EntityFramework.csproj" />
+  </Folder>
+  <Project Path="ArbitrationCourt/ArbitrationCourt.csproj" />
+</Solution>
